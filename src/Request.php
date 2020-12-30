@@ -449,6 +449,7 @@ class Request
         if (!empty($this->promises)) {
             Promise\settle($this->promises)->wait();
         }
+        $this->promises = [];
     }
 
     protected function response($response)

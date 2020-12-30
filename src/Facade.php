@@ -5,6 +5,12 @@ namespace Gouguoyin\EasyHttp;
 class Facade
 {
     protected $facade;
+    /**
+     * \GuzzleHttp\Client单例
+     * @var array
+     */
+    private static $instances = [];
+
 
     public function __construct()
     {
@@ -16,6 +22,10 @@ class Facade
     }
 
     public static function __callStatic($name, $params) {
-        return call_user_func_array([new static(), $name], $params);
+        $key = md5(static::class);
+        if(!isset(self::$instances[$key])){
+            self::$instances[$key] = new static();
+        }
+        return call_user_func_array([self::$instances[$key], $name], $params);
     }
 }
