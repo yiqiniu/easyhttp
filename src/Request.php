@@ -2,11 +2,11 @@
 
 namespace Gouguoyin\EasyHttp;
 
-use GuzzleHttp\Pool;
 use GuzzleHttp\Client;
-use GuzzleHttp\Promise;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Promise;
 
 /**
  * @method \Gouguoyin\EasyHttp\Response body()
@@ -65,7 +65,7 @@ class Request
         $this->client = $this->getInstance();
 
         $this->bodyFormat = 'form_params';
-        $this->options    = [
+        $this->options = [
             'http_errors' => false,
         ];
     }
@@ -116,9 +116,9 @@ class Request
         $this->bodyFormat = 'multipart';
 
         $this->options = array_filter([
-            'name'     => $name,
+            'name' => $name,
             'contents' => $contents,
-            'headers'  => $headers,
+            'headers' => $headers,
             'filename' => $filename,
         ]);
 
@@ -244,9 +244,9 @@ class Request
     public function attach(string $name, string $contents, string $filename = null, array $headers = [])
     {
         $this->options['multipart'] = array_filter([
-            'name'     => $name,
+            'name' => $name,
             'contents' => $contents,
-            'headers'  => $headers,
+            'headers' => $headers,
             'filename' => $filename,
         ]);
 
@@ -357,24 +357,24 @@ class Request
     {
         $count = count($promises);
 
-        $this->concurrency = $this->concurrency ? : $count;
+        $this->concurrency = $this->concurrency ?: $count;
 
         $requests = function () use ($promises) {
             foreach ($promises as $promise) {
-                yield function() use ($promise) {
+                yield function () use ($promise) {
                     return $promise;
                 };
             }
         };
 
-        $fulfilled = function ($response, $index) use ($success){
+        $fulfilled = function ($response, $index) use ($success) {
             if (!is_null($success)) {
                 $response = $this->response($response);
                 call_user_func_array($success, [$response, $index]);
             }
         };
 
-        $rejected = function ($exception, $index) use ($fail){
+        $rejected = function ($exception, $index) use ($fail) {
             if (!is_null($fail)) {
                 $exception = $this->exception($exception);
                 call_user_func_array($fail, [$exception, $index]);
@@ -383,8 +383,8 @@ class Request
 
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => $this->concurrency,
-            'fulfilled'   => $fulfilled,
-            'rejected'    => $rejected,
+            'fulfilled' => $fulfilled,
+            'rejected' => $rejected,
         ]);
 
         $pool->promise();
@@ -408,10 +408,10 @@ class Request
     {
         if (is_callable($options)) {
             $successCallback = $options;
-            $failCallback    = $success;
+            $failCallback = $success;
         } else {
             $successCallback = $success;
-            $failCallback    = $fail;
+            $failCallback = $fail;
         }
 
         isset($this->options[$this->bodyFormat]) && $this->options[$this->bodyFormat] = $options;
@@ -419,14 +419,14 @@ class Request
         try {
             $promise = $this->client->requestAsync($method, $url, $this->options);
 
-            $fulfilled = function ($response) use ($successCallback){
+            $fulfilled = function ($response) use ($successCallback) {
                 if (!is_null($successCallback)) {
                     $response = $this->response($response);
                     call_user_func_array($successCallback, [$response]);
                 }
             };
 
-            $rejected = function ($exception) use ($failCallback){
+            $rejected = function ($exception) use ($failCallback) {
                 if (!is_null($failCallback)) {
                     $exception = $this->exception($exception);
                     call_user_func_array($failCallback, [$exception]);
@@ -441,6 +441,13 @@ class Request
 
         } catch (ConnectException $e) {
             throw new ConnectionException($e->getMessage(), 0, $e);
+        }
+    }
+
+    public function wait()
+    {
+        if (!empty($this->promises)) {
+            Promise\settle($this->promises)->wait();
         }
     }
 

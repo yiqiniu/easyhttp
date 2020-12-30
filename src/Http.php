@@ -41,6 +41,7 @@ namespace Gouguoyin\EasyHttp;
  * @method static \Gouguoyin\EasyHttp\Request headAsync(string $url, array|null $data = null, callable $success = null, callable $fail = null)
  * @method static \Gouguoyin\EasyHttp\Request optionsAsync(string $url, array|null $data = null, callable $success = null, callable $fail = null)
  * @method static \Gouguoyin\EasyHttp\Request multiAsync(array $promises, callable $success = null, callable $fail = null)
+ * @method static \Gouguoyin\EasyHttp\Request wait()
  */
 
 class Http extends Facade
