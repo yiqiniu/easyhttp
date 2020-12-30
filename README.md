@@ -218,6 +218,10 @@ Http::deleteAsync(...);
 Http::headAsync(...);
 
 Http::optionsAsync(...);
+
+使用 等待异步回调处理完成
+Http::wait();
+
 ```
 
 #### 异步并发请求
