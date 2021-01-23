@@ -46,6 +46,8 @@ class Request
      */
     protected $options = [];
 
+    protected $multipart = [];
+
     /**
      * @var array
      */
@@ -111,9 +113,18 @@ class Request
         return $this;
     }
 
-    public function asMultipart()
+    public function asMultipart(string $name, string $contents, string $filename = null, array $headers = [])
     {
         $this->bodyFormat = 'multipart';
+
+
+        $this->multipart[] = array_filter([
+            'name' => $name,
+            'contents' => $contents,
+            'headers' => $headers,
+            'filename' => $filename,
+        ]);
+
         return $this;
     }
 
@@ -233,6 +244,18 @@ class Request
         return $this;
     }
 
+    public function attach(string $name, string $contents, string $filename = null, array $headers = [])
+    {
+        $this->multipart[] = array_filter([
+            'name' => $name,
+            'contents' => $contents,
+            'headers' => $headers,
+            'filename' => $filename,
+        ]);
+
+        return $this;
+    }
+
     public function get(string $url, array $query = [])
     {
         parse_str(parse_url($url, PHP_URL_QUERY), $result);
@@ -242,8 +265,25 @@ class Request
         return $this->request('GET', $url, $query);
     }
 
+    protected function makeMultipart($data)
+    {
+        $data2 = [];
+        if(!empty($data)){
+            foreach ($data as $k => $v) {
+                $data2[] = ['name' => $k, 'contents' => $v];
+            }
+        }
+        foreach ($this->multipart as $row) {
+            $data2[] = $row;
+        }
+        return $data2;
+    }
+
     public function post(string $url, array $data = [])
     {
+        if (!empty($this->multipart)) {
+            $data = $this->makeMultipart($data);
+        }
         $this->options[$this->bodyFormat] = $data;
 
         return $this->request('POST', $url, $data);
@@ -293,6 +333,11 @@ class Request
 
     public function postAsync(string $url, $data = null, callable $success = null, callable $fail = null)
     {
+
+        if (!empty($this->multipart)) {
+            $data = $this->makeMultipart($data);
+        }
+
         is_callable($data) || $this->options[$this->bodyFormat] = $data;
 
         return $this->requestAsync('POST', $url, $data, $success, $fail);

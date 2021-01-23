@@ -279,6 +279,10 @@ $e->getTrace() : array;
 $e->getTraceAsString() : string;
 ```
 ## 更新日志
+### 2021-01-23
+* 修复上传的asMultipart错误的bug
+* 新增 wait() 用于等待异步请求的加调
+
 ### 2020-03-30
 * 修复部分情况下IDE不能智能提示的BUG
 * get()、getAsync()方法支持带参数的url
