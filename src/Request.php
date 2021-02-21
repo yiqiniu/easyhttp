@@ -69,6 +69,7 @@ class Request
         $this->bodyFormat = 'form_params';
         $this->options = [
             'http_errors' => false,
+            'verify' => false
         ];
     }
 
