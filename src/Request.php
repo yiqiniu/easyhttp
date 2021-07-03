@@ -145,6 +145,11 @@ class Request
 
     public function withHeaders(array $headers)
     {
+        if (is_array($headers)){
+            foreach ($headers as $k=>$v){
+                unset($this->options['headers'][$k]);
+            }
+        }
         $this->options = array_merge_recursive($this->options, [
             'headers' => $headers,
         ]);
